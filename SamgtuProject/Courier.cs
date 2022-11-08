@@ -6,42 +6,111 @@ using System.Threading.Tasks;
 
 namespace SamgtuProject
 {
-    class Courier
+    abstract class Courier : IComparable<Courier>
     {
-        private Point location = new Point(0, 0);
+        public Point Location { get; set; }
 
-        public Point Location { get { return location; } }
+        // м / мин
+        public abstract double Speed { get; } 
 
-        // километры в минуты
-        public double Speed { get; set; }
+        public string Name { get; set; }
 
-        // цена за километр
         public double Price { get; set; }
 
-        private List<Order> Orders = new List<Order>();
+        public double CarryingCapacity { get; set; }
 
-        public Courier(double speed, double price)
+        public bool CanTakeTheCargo(Order order)
         {
-            Speed = speed;
-            Price = price;
+            return CarryingCapacity >= order.Weight;
+        }
+        public Courier( double carryingCapacity, string name, Point point)
+        {
+            CarryingCapacity = carryingCapacity;
+            Name = name;
+            this.Location = point;
         }
 
+        private List<Order> _orders = new List<Order>();
+
+        public int CountOrders() => _orders.Count;
+
+        public void SetOnOrder(Order order) => _orders.Add(order);
 
 
-        public void AssignToOrder(Order order)
+        public void PrintOrders()
         {
-            double distanceToOrders = Math.Sqrt(Math.Pow(order.PlaceOfDeparture.X - location.X, 2) + Math.Pow(order.PlaceOfDeparture.Y - location.Y, 2));
-            Console.WriteLine($"Расстояние курьера до заказа {distanceToOrders} км");
+            Console.WriteLine("Заказы курера");
+            foreach (var order in _orders)
+            {
+                Console.WriteLine(order);
+            }
+        }
 
-            double distance = Math.Round(Math.Round(distanceToOrders, 2) + order.GetDistance(), 2);
-            Console.WriteLine($"Общее расстояние {distance} км");
+        public double GetPriceOrder(Order order)
+        {
+            return Price * order.From.GetDistance(order.To);
+        }
 
-            double cost = Math.Round(Price * distance, 2);
-            Console.WriteLine($"Стоимость доставки {cost} рублей");
-            double time = distance / Speed;
+        //public void AssignToOrder(Order order)
+        //{
+        //    double distanceToOrders = Math.Sqrt(Math.Pow(order.PlaceOfDeparture.X - location.X, 2) + Math.Pow(order.PlaceOfDeparture.Y - location.Y, 2));
+        //    Console.WriteLine($"Расстояние курьера до заказа {distanceToOrders} км");
 
-            Console.WriteLine($"Время в минутах {time}");
-        
+        //    double distance = Math.Round(Math.Round(distanceToOrders, 2) + order.GetDistance(), 2);
+        //    Console.WriteLine($"Общее расстояние {distance} км");
+
+        //    double cost = Math.Round(Price * distance, 2);
+        //    Console.WriteLine($"Стоимость доставки {cost} рублей");
+        //    double time = distance / Speed;
+
+        //    Console.WriteLine($"Время в минутах {time}");
+
+        //}
+        public override string ToString()
+        {
+            return string.Format("Курьер: {0}|" +
+                " Скорость: {1} |" +
+                " Грузоподъмность {2} |" +
+                " Находится в {3}",
+                Name, Speed, CarryingCapacity, Location.ToString());
+        }
+
+        public int CompareTo(Courier? other)
+        {
+            return this.CarryingCapacity > other.CarryingCapacity ? 1 : -1;
         }
     }
+
+    class FootCourier : Courier
+    {
+        public FootCourier(double carryingCapacity, string name, Point point) 
+            :base(carryingCapacity, name, point)
+        {
+            Price = Company.DefaultPrice;
+        }
+
+        public override double Speed { get { return 100; } }
+    }
+
+    class TransportCourier : Courier
+    {
+        public override double Speed { get { return 1500; } }
+        public TransportCourier(double carryingCapacity, string name, Point point) 
+            :base(carryingCapacity, name, point)
+        {
+            Price = Company.DefaultPrice * 3;
+        }
+    }
+
+    class CargoCourier : TransportCourier
+    {
+        public override double Speed { get { return 700; } }
+
+        public CargoCourier(double carryingCapacity, string name, Point point) : base(carryingCapacity, name, point)
+        {
+            Price = Company.DefaultPrice * 7;
+
+        }
+    }
+
 }
