@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SamgtuProject
 {
-    abstract class Courier : IComparable<Courier>
+    public abstract class Courier : IComparable<Courier>
     {
         public Point Location { get; set; }
 

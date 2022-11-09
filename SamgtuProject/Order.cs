@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SamgtuProject
 {
-    class Order
+    public class Order
     {
         private double weight;
 
