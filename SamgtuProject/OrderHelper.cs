@@ -17,7 +17,7 @@ namespace SamgtuProject
         }
         public Courier InstructOrder(List<Courier> couriers)
         {
-            // сначала сортируется по цене, потом сортируется по свободно ли есть место у курьеров, потом сможет ли взять по весу
+            // сначала сортируется по весу, потом сортируется по свободно ли есть место у курьеров, потом сможет ли взять по весу
             var find = couriers
                 .OrderBy(c => c.CarryingCapacity)
                 .OrderBy(c => c.CountOrders())
