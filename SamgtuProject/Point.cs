@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SamgtuProject
 {
-    public struct Point
+    public class Point
     {
         public double X { get; set; }
         public double Y { get; set; }

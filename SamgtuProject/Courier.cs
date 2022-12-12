@@ -18,7 +18,6 @@ namespace SamgtuProject
         public double Price { get; set; }
 
         public double CarryingCapacity { get; set; }
-
         public bool CanTakeTheCargo(Order order)
         {
             return CarryingCapacity >= order.Weight;
@@ -36,19 +35,27 @@ namespace SamgtuProject
 
         public void SetOnOrder(Order order) => _orders.Add(order);
 
-
+        public Point GetLocation ()
+        {
+            if (_orders.Count != 0)
+                return _orders[_orders.Count - 1].To;
+            else
+                return Location;
+        }
         public void PrintOrders()
         {
             Console.WriteLine("Заказы курера");
             foreach (var order in _orders)
             {
+                Console.WriteLine("Расстояние до закказа");
+                Console.WriteLine(order.From.GetDistance(this.Location));
                 Console.WriteLine(order);
             }
         }
 
         public double GetPriceOrder(Order order)
         {
-            return Price * order.From.GetDistance(order.To);
+            return Price * order.Weight;
         }
 
         //public void AssignToOrder(Order order)
@@ -66,6 +73,66 @@ namespace SamgtuProject
         //    Console.WriteLine($"Время в минутах {time}");
 
         //}
+
+        public PlaningOption CanAcceptOrder(Order order)
+        {
+            var planingOption = new PlaningOption();
+
+            bool canCargo = CanTakeTheCargo(order);
+
+            if (canCargo)
+            {
+                var price = GetPriceOrder(order);
+                planingOption.Price = price;
+                planingOption.ReadyAcept = true;
+                planingOption.HowManyTime = HowManyTime(order);
+                planingOption.Courier = this;
+            }
+                
+            return planingOption;
+        }
+        // до какого времени он сделает заказ
+        public DateTime HowManyTime(Order order)
+        {
+            double t1;
+            double t2;
+            var beforeDistance = order.From.GetDistance(this.GetLocation());
+            var afterDistance = order.To.GetDistance(order.To);
+
+            t1 = Math.Round(beforeDistance / this.Speed, 2)*180;
+            t2 = Math.Round(afterDistance/ this.Speed, 2)*180;
+
+
+            var sum_t = DateTime.Now.AddMinutes(t1 + t2);
+            return sum_t;
+        }
+
+
+        // есть или у курьера заказы
+        public bool ThereAreOrders ()
+        {
+            return _orders.Count > 0;
+        }
+
+        public void SortOrders()
+        {
+            List<Order> sortOrders = new List<Order>();
+            double minDistance = _orders[0].From.GetDistance(this.Location);
+
+            foreach (var order in _orders)
+            {
+                double distance = order.From.GetDistance(this.Location);
+                if (distance < minDistance)
+                {
+                    sortOrders.Insert(0, order);
+                    minDistance = distance;
+                } else
+                {
+                    sortOrders.Add(order);
+                }
+            }
+            _orders = sortOrders;
+        }
         public override string ToString()
         {
             return string.Format("Курьер: {0}|" +
@@ -77,7 +144,7 @@ namespace SamgtuProject
 
         public int CompareTo(Courier? other)
         {
-            return this.CarryingCapacity > other.CarryingCapacity ? 1 : -1;
+            return this.CountOrders() - other.CountOrders();
         }
     }
 
@@ -108,7 +175,7 @@ namespace SamgtuProject
 
         public CargoCourier(double carryingCapacity, string name, Point point) : base(carryingCapacity, name, point)
         {
-            Price = Company.DefaultPrice * 7;
+            Price = Company.DefaultPrice * 5;
 
         }
     }
