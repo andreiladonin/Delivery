@@ -10,15 +10,17 @@ namespace SamgtuProject
     class Company
     {
         public const double DefaultPrice = 50;
-        
+
         public static HashSet<Courier> Couriers = new HashSet<Courier>();
         public static List<Order> Orders = new List<Order>();
+        private static double _sumTotal;
 
+        public static double SumTotal { get { return _sumTotal; } }
         public static void DistributeOrders()
         {
-            
+
             // распределение заказов
-            while  (Orders.Count != 0)
+            while (Orders.Count != 0)
             {
                 var order = Orders.First();
                 Console.WriteLine(order);
@@ -34,7 +36,7 @@ namespace SamgtuProject
                         Console.WriteLine($"\t до какого времени он сделает заказ {planingOptions.HowManyTime}");
                         Console.WriteLine();
                         planings.Add(planingOptions);
-                       
+
                     }
                 }
                 if (planings.Count == 1)
@@ -42,12 +44,19 @@ namespace SamgtuProject
                 else
                 {
                     CheckToBestOption(order, planings);
-
-
                 }
-                //CheckToBestOption(order, planings);
+                
                 Orders.Remove(order);
             }
+
+            double sumTotal = 0;
+
+            foreach (var courier in Couriers)
+            {
+                sumTotal += courier.SumTotal();
+            }
+
+            _sumTotal += sumTotal;
         }
 
 
@@ -59,18 +68,18 @@ namespace SamgtuProject
             bestPlaningOption.HowManyTime = planingOptions[0].HowManyTime;
             bestPlaningOption.Courier = planingOptions[0].Courier;
 
-            List <Courier> couriers  = new();
+            List<Courier> couriers = new();
 
-            foreach(PlaningOption planingOption in planingOptions)
+            foreach (PlaningOption planingOption in planingOptions)
             {
-               couriers.Add(planingOption.Courier);
+                couriers.Add(planingOption.Courier);
             }
 
             couriers = couriers.OrderBy(x => x.CountOrders()).ToList();
 
 
-            
-            for (int i = couriers.Count - 1; i >= 0 ; i--)
+
+            for (int i = couriers.Count - 1; i >= 0; i--)
             {
                 for (int j = couriers.Count - 2; j >= 1; j--)
                 {
@@ -80,7 +89,7 @@ namespace SamgtuProject
                             bestPlaningOption.Courier = couriers[j];
                         else
                             bestPlaningOption.Courier = couriers[i];
-                    } 
+                    }
                     else if (couriers[i].HowManyTime(order) < couriers[j].HowManyTime(order))
                     {
                         if (couriers[i].CountOrders() < couriers[j].CountOrders())
@@ -92,6 +101,25 @@ namespace SamgtuProject
             }
 
             bestPlaningOption.Courier.SetOnOrder(order);
+        }
+
+
+
+        public static void AddOrder()
+        {
+            Console.WriteLine("Введите вес заказа ");
+
+            double weight = Convert.ToDouble(Console.ReadLine());
+
+            Point from = PointHelper.GetRandomPoint();
+            Point to = PointHelper.GetRandomPoint();
+
+
+            Order order = new(weight, from, to);
+
+            Console.WriteLine("Заказ создан");
+            Console.WriteLine("\t " + order);
+            Orders.Add(order);
         }
     }
 }

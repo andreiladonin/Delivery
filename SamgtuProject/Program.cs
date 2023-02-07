@@ -38,4 +38,57 @@ foreach(var courier in Company.Couriers)
     courier.PrintOrders();
     Console.WriteLine();
 }
-Console.ReadLine();
+Console.WriteLine();
+Console.WriteLine();
+
+Console.WriteLine($"Общая прибыль компании {Company.SumTotal} рублей.");
+
+Console.WriteLine();
+Console.WriteLine();
+
+while (true)
+{
+    Console.WriteLine("Опции программы \n\t (1) - добавить заказ " +
+        "\n\t (2) - список заказов у компании" +
+        " \n\t (3) - рапсределить заказы \n\t " +
+        "(4) - удалить заказы \n\t" +
+        "(0) - завершить работу ");
+
+    string answer = Console.ReadLine();
+    if (answer == null || answer[0] == '0')
+    {
+        break;
+    } else if (answer[0] == '1')
+    {
+        Company.AddOrder();
+    } else if (answer[0] == '2') {
+
+        if (Company.Orders.Count > 0)
+        {
+            foreach (var order in Company.Orders)
+            {
+                Console.WriteLine(order);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Заказов нет");
+            
+        }
+    } else if (answer[0] == '3')
+    {
+        if(Company.Orders.Count > 0)
+        {
+            Company.DistributeOrders();
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.WriteLine($"Общая прибыль компании {Company.SumTotal} рублей.");
+
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+        else
+            Console.WriteLine("Нет заказов");
+    }
+}

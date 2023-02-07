@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,10 @@ namespace SamgtuProject
     public abstract class Courier : IComparable<Courier>
     {
         public Point Location { get; set; }
+
+        private static int id;
+
+        public int Id { get; private set; } 
 
         // м / мин
         public abstract double Speed { get; } 
@@ -24,8 +29,10 @@ namespace SamgtuProject
         }
         public Courier( double carryingCapacity, string name, Point point)
         {
+            id += 1;
+            Id = id;
             CarryingCapacity = carryingCapacity;
-            Name = name;
+            Name = name;    
             this.Location = point;
         }
 
@@ -135,16 +142,27 @@ namespace SamgtuProject
         }
         public override string ToString()
         {
-            return string.Format("Курьер: {0}|" +
-                " Скорость: {1} |" +
-                " Грузоподъмность {2} |" +
-                " Находится в {3}",
+            return string.Format("ID: {0} Курьер: {1}|" +
+                " Скорость: {2} |" +
+                " Грузоподъмность {3} |" +
+                " Находится в {4}", Id,
                 Name, Speed, CarryingCapacity, Location.ToString());
         }
 
         public int CompareTo(Courier? other)
         {
             return this.CountOrders() - other.CountOrders();
+        }
+
+        public double SumTotal()
+        {
+            double sum = 0;
+            foreach (var order in _orders)
+            {
+                sum += GetPriceOrder(order);
+            }
+
+            return sum;
         }
     }
 
