@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +24,6 @@ namespace SamgtuProject
             while (Orders.Count != 0)
             {
                 var order = Orders.First();
-                Console.WriteLine(order);
                 List<PlaningOption> planings = new List<PlaningOption>();
                 foreach (var courier in Couriers)
                 {
@@ -31,12 +31,7 @@ namespace SamgtuProject
 
                     if (planingOptions.ReadyAcept)
                     {
-                        Console.WriteLine($"\t Курьер {courier.Name} готов принять заказ. Стоимость курьера на заказ {planingOptions.Price}");
-
-                        Console.WriteLine($"\t до какого времени он сделает заказ {planingOptions.HowManyTime}");
-                        Console.WriteLine();
                         planings.Add(planingOptions);
-
                     }
                 }
                 if (planings.Count == 1)
@@ -75,27 +70,35 @@ namespace SamgtuProject
                 couriers.Add(planingOption.Courier);
             }
 
-            couriers = couriers.OrderBy(x => x.CountOrders()).ToList();
 
-
-
-            for (int i = couriers.Count - 1; i >= 0; i--)
+            for (int i = 0; i < couriers.Count; i++)
             {
-                for (int j = couriers.Count - 2; j >= 1; j--)
+                for (int j = 0; j < couriers.Count - 1; j++)
                 {
-                    if (couriers[j].HowManyTime(order) < couriers[i].HowManyTime(order))
+                    if (HowManyTime(couriers[i], order) < HowManyTime(couriers[j], order))
                     {
-                        if (couriers[j].CountOrders() < couriers[i].CountOrders())
+
+                        if (couriers[i].CountOrders() > couriers[j].CountOrders())
+                        {
                             bestPlaningOption.Courier = couriers[j];
+                        }
                         else
+                        {
                             bestPlaningOption.Courier = couriers[i];
+                        }
+                         
                     }
-                    else if (couriers[i].HowManyTime(order) < couriers[j].HowManyTime(order))
+                    else
                     {
-                        if (couriers[i].CountOrders() < couriers[j].CountOrders())
+                        if (couriers[j].CountOrders() > couriers[i].CountOrders())
+                        {
                             bestPlaningOption.Courier = couriers[i];
+                        }
                         else
+                        {
                             bestPlaningOption.Courier = couriers[j];
+                        }
+                        
                     }
                 }
             }
@@ -103,23 +106,21 @@ namespace SamgtuProject
             bestPlaningOption.Courier.SetOnOrder(order);
         }
 
-
-
-        public static void AddOrder()
+        public static DateTime HowManyTime(Courier courrier, Order order)
         {
-            Console.WriteLine("Введите вес заказа ");
+            double t1;
+            double t2;
+            var beforeDistance = order.From.GetDistance(courrier.GetLocation());
+            var afterDistance = order.To.GetDistance(order.To);
 
-            double weight = Convert.ToDouble(Console.ReadLine());
-
-            Point from = PointHelper.GetRandomPoint();
-            Point to = PointHelper.GetRandomPoint();
+            t1 = Math.Round(beforeDistance / courrier.Speed, 2);
+            t2 = Math.Round(afterDistance / courrier.Speed, 2);
 
 
-            Order order = new(weight, from, to);
-
-            Console.WriteLine("Заказ создан");
-            Console.WriteLine("\t " + order);
-            Orders.Add(order);
+            var sum_t = DateTime.Now.AddMinutes(t1 + t2);
+            return sum_t;
         }
     }
+
 }
+
